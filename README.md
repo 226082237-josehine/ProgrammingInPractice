@@ -1,2 +1,2 @@
-# Programming-In-Practice-
+# ProgrammingInPractice
 Class Activity
