@@ -3,7 +3,8 @@
  float basicSalary;
  float housing;
  float transport;
- float tax; float grossSalary;
+ float tax;
+ float grossSalary;
  float netSalary;
  printf("Enter basic salary: ");
  scanf("%f", &basicSalary);
@@ -16,5 +17,11 @@
  netSalary = grossSalary - tax;
  printf("\nGross Salary: %.2f\n", grossSalary);
  printf("Net Salary: %.2f\n", netSalary);
+ if (netSalary < 20000) {
+    printf("standard income.\n");
+}
+    else{
+    printf("high income.\n");
+    }
  return 0;
  } 
