@@ -4,129 +4,163 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-#endif
 #endif
 
-#define CLR_PINK    "\033[35m"
-#define CLR_RESET   "\033[0m"
+#define INPUT_SIZE 32
 
-void displayMenu(void) {
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+#define OPT_EMPLOYEES 1
+#define OPT_BUDGET    2
+#define OPT_SUPPLIERS 3
+#define OPT_ASSETS    4
+#define OPT_REPORTS   5
+#define OPT_EXIT      6
 
-    printf(CLR_PINK "  --------------------------------------------------\n" CLR_RESET);
-    printf(CLR_PINK "  |      MUNICIPAL FINANCIAL MANAGEMENT SYSTEM     |\n" CLR_RESET);
-    printf(CLR_PINK "  --------------------------------------------------\n" CLR_RESET);
-    printf(CLR_PINK "  | " CLR_RESET "1. Employee Management                       " CLR_PINK "|\n" CLR_RESET);
-    printf(CLR_PINK "  | " CLR_RESET "2. Budget Management                         " CLR_PINK "|\n" CLR_RESET);
-    printf(CLR_PINK "  | " CLR_RESET "3. Supplier Management                       " CLR_PINK "|\n" CLR_RESET);
-    printf(CLR_PINK "  | " CLR_RESET "4. Asset Management                          " CLR_PINK "|\n" CLR_RESET);
-    printf(CLR_PINK "  | " CLR_RESET "5. System Reports                            " CLR_PINK "|\n" CLR_RESET);
-    printf(CLR_PINK "  | " CLR_RESET "6. Exit                                      " CLR_PINK "|\n" CLR_RESET);
-    printf(CLR_PINK "  --------------------------------------------------\n" CLR_RESET);
-    printf("\n  Enter choice (1-6): ");
+#define PINK  "\033[38;5;213m"
+#define BOLD  "\033[1m"
+#define RESET "\033[0m"
+
+void employeeMenu(void);
+void budgetMenu(void);
+void supplierMenu(void);
+void assetMenu(void);
+void reportsMenu(void);
+
+void enableColours(void);
+void displayMenu(void);
+int  getMenuChoice(int min, int max);
+int  confirmExit(void);
+
+void enableColours(void)
+{
+#ifdef _WIN32
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+
+    if (console != INVALID_HANDLE_VALUE && GetConsoleMode(console, &mode)) {
+        SetConsoleMode(console, mode | 0x0004); 
+    }
+#endif
 }
 
-int main(void) {
-    #ifdef _WIN32
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (hOut != INVALID_HANDLE_VALUE) {
-            DWORD dwMode = 0;
-            if (GetConsoleMode(hOut, &dwMode)) {
-                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                SetConsoleMode(hOut, dwMode);
-            }
+void displayMenu(void)
+{
+    printf("\n" PINK BOLD);
+    printf("========================================\n");
+    printf("MUNICIPAL FINANCIAL MANAGEMENT SYSTEM\n");
+    printf("========================================\n" RESET PINK);
+    printf("1. Employee Management\n");
+    printf("2. Budget Management\n");
+    printf("3. Supplier Management\n");
+    printf("4. Asset Management\n");
+    printf("5. Reports\n");
+    printf("6. Exit\n" RESET);
+    printf("\n");
+}
+
+int getMenuChoice(int min, int max)
+{
+    char buffer[INPUT_SIZE];
+    char *end;
+    long value;
+
+    printf("Enter your choice: ");
+
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+        return max;  
+    }
+
+    if (strchr(buffer, '\n') == NULL) {
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF) {
+            
         }
-    #endif
+        return -1;
+    }
 
-    char muniName[100] = "";
-    char mayorName[100] = "";
-    int population = 0;
-    double totalRevenue = 0.0;
-    double totalExpenses = 0.0;
-    int choice = 0;
+    value = strtol(buffer, &end, 10);
 
-    printf("Municipal Financial Management System\n\n");
-    printf("Enter Municipality Name: ");
-    fgets(muniName, sizeof(muniName), stdin);
-    muniName[strcspn(muniName, "\n")] = 0; 
+    if (end == buffer) {
+        return -1;  
+    }
 
-    printf("Enter Mayor: ");
-    fgets(mayorName, sizeof(mayorName), stdin);
-    mayorName[strcspn(mayorName, "\n")] = 0; 
+    while (*end == ' ' || *end == '\t') {
+        end++;  
+    }
 
-    printf("Enter Population: ");
-    if (scanf("%d", &population) != 1) population = 0;
-    while (getchar() != '\n'); 
+    if (*end != '\n' && *end != '\0') {
+        return -1; 
+    }
+
+    if (value < min || value > max) {
+        return -1;
+    }
+
+    return (int)value;
+}
+
+int confirmExit(void)
+{
+    char buffer[INPUT_SIZE];
 
     while (1) {
-        displayMenu();
-        
-        if (scanf("%d", &choice) != 1) {
-            printf("\n  Invalid input! Please enter a number.\n");
-            while (getchar() != '\n'); 
-            printf("\n  Press Enter to try again...");
-            getchar();
-            continue;
+        printf("Are you sure you want to exit? (y/n): ");
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            return 1;
         }
-        while (getchar() != '\n'); 
-
-        switch(choice) {
-            case 1:
-                printf("\n" CLR_PINK "  [EMPLOYEE MANAGEMENT]" CLR_RESET "\n");
-                printf("  ------------------------------------\n");
-                printf("  Muni: %s | Mayor: %s | Pop: %d\n", muniName, mayorName, population);
-                break;
-
-            case 2:
-                printf("\n" CLR_PINK "  [BUDGET MANAGEMENT]" CLR_RESET "\n");
-                printf("  ------------------------------------\n");
-                printf("  Enter total revenue (N$): ");
-                if (scanf("%lf", &totalRevenue) != 1) totalRevenue = 0.0;
-                
-                printf("  Enter total expenses (N$): ");
-                if (scanf("%lf", &totalExpenses) != 1) totalExpenses = 0.0;
-                while (getchar() != '\n'); 
-
-                printf("\n" CLR_PINK "  -- Budget Summary --" CLR_RESET "\n");
-                printf("  Revenue:  N$ %.2f\n", totalRevenue);
-                printf("  Expenses: N$ %.2f\n", totalExpenses);
-                printf("  Remaining: N$ %.2f\n", totalRevenue - totalExpenses);
-                break;
-
-            case 3:
-                printf("\n  Routing to [Supplier Management]...\n");
-                break;
-
-            case 4:
-                printf("\n  Routing to [Asset Management]...\n");
-                break;
-
-            case 5:
-                printf("\n" CLR_PINK "  [SYSTEM REPORT DASHBOARD]" CLR_RESET "\n");
-                printf("  ------------------------------------\n");
-                printf("  Municipality: %s\n", muniName);
-                printf("  Current Leader: Mayor %s\n", mayorName);
-                printf("  Total Citizens: %d\n", population);
-                printf("  Financial Status: Current Budget Remaining is N$ %.2f\n", totalRevenue - totalExpenses);
-                break;
-
-            case 6:
-                printf("\n  Exiting system. Goodbye!\n\n");
-                return 0;
-
-            default:
-                printf("\n  Choice out of bounds. Pick 1 to 6.\n");
-                break;
+        if (buffer[0] == 'y' || buffer[0] == 'Y') {
+            return 1;
         }
-        
-        printf("\n  Press Enter to return to the menu...");
-        getchar(); 
+        if (buffer[0] == 'n' || buffer[0] == 'N') {
+            return 0;
+        }
+        printf("Please enter y or n.\n");
     }
+}
+
+int main(void)
+{
+    int choice = 0;
+    int running = 1;
+
+    enableColours();
+
+    while (running) {
+        displayMenu();
+        choice = getMenuChoice(OPT_EMPLOYEES, OPT_EXIT);
+
+        switch (choice) {
+            case OPT_EMPLOYEES:
+                employeeMenu();
+                break;
+            case OPT_BUDGET:
+                budgetMenu();
+                break;
+            case OPT_SUPPLIERS:
+                supplierMenu();
+                break;
+            case OPT_ASSETS:
+                assetMenu();
+                break;
+            case OPT_REPORTS:
+                reportsMenu();
+                break;
+            case OPT_EXIT:
+                if (confirmExit()) {
+                    running = 0;
+                }
+                break;
+            default:
+                printf("\nInvalid choice. Please enter a number from 1 to 6.\n");
+                break;
+        }
+    }
+
+    printf("\nThank you for using the MFMS. Goodbye!\n");
     return 0;
 }
+
+void employeeMenu(void) { printf("\n[Employee Management - coming soon]\n"); }
+void budgetMenu(void)   { printf("\n[Budget Management - coming soon]\n"); }
+void supplierMenu(void) { printf("\n[Supplier Management - coming soon]\n"); }
+void assetMenu(void)    { printf("\n[Asset Management - coming soon]\n"); }
+void reportsMenu(void)  { printf("\n[Reports - coming soon]\n"); }
