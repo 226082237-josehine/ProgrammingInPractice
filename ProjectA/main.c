@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -159,7 +159,6 @@ int main(void)
     return 0;
 }
 
-void employeeMenu(void) { printf("\n[Employee Management - coming soon]\n"); }
 void budgetMenu(void)   { printf("\n[Budget Management - coming soon]\n"); }
 void supplierMenu(void) { printf("\n[Supplier Management - coming soon]\n"); }
 void assetMenu(void)    { printf("\n[Asset Management - coming soon]\n"); }
